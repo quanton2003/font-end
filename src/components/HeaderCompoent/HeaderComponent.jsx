@@ -1,7 +1,6 @@
 import { Col } from 'antd'
 import React from 'react'
 import { WrapperHeader, WrapperHeaderAccout, WrapperTextHeader, WrapperTextHeaderSmall } from './style'
-import Search from 'antd/es/transfer/search'
 import {
   CaretDownOutlined,
   ShoppingCartOutlined,
