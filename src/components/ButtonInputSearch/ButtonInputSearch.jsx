@@ -1,14 +1,14 @@
-import {  } from 'antd'
-import React from 'react'
+import React from 'react';
 import { SearchOutlined } from '@ant-design/icons';
 import InputComponent from '../inputComponent/inputComponent';
 import ButtonComponent from '../ButttonComponent/ButttonComponent';
+
 const ButtonInputSearch = (props) => {
     const {
         size,
         placeholder,
         textButton,
-        bordered = true,
+        variant = 'outlined', // Thay bordered bằng variant
         backgroundColorInput = '#fff',
         backgroundColorButton = 'rgb(13,92,182)',
         colorButton = '#fff'
@@ -20,7 +20,7 @@ const ButtonInputSearch = (props) => {
             <InputComponent
                 size={size}
                 placeholder={placeholder}
-                bordered={bordered}
+                variant={variant} // Sử dụng variant thay vì bordered
                 style={{
                     backgroundColor: backgroundColorInput,
                     borderRadius: 0, // Bỏ bo góc
@@ -34,11 +34,11 @@ const ButtonInputSearch = (props) => {
                     background: backgroundColorButton,
                     color: colorButton,
                     borderRadius: 0, // Bỏ bo góc
-                    border: !bordered ? 'none' : undefined
+                    border: variant === 'borderless' ? 'none' : undefined
                 }}
                 icon={<SearchOutlined style={{ color: colorButton }} />}
             >
-              <span> {textButton}</span>
+              <span>{textButton}</span>
             </ButtonComponent>
         </div>
     )

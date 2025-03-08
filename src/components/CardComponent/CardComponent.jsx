@@ -4,13 +4,16 @@ import { StyleNameProduct, WrapperCardStyle, WrapperDiscountText, WrapperPriceTe
 import { StarFilled } from '@ant-design/icons'
 const CardComponent = () => {
     return (
-        <WrapperCardStyle
-            hoverable
-            headStyle={{ width: '200px', height: '200px'}}
-            style={{ width: 200 }}
-            bodyStyle={{ padding: '10px' }}
-            cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
-        >
+<WrapperCardStyle
+    hoverable
+    styles={{
+        header: { width: '200px', height: '200px' },  
+        body: { padding: '10px' } 
+    }}
+    style={{ width: 200 }}
+    cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
+>
+
             <StyleNameProduct>
                 Iphone
             </StyleNameProduct>

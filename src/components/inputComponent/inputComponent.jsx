@@ -1,14 +1,14 @@
 import { Input } from 'antd';
 import React from 'react';
 
-const InputComponent = ({ size, placeholder, bordered, style = {}, ...rests }) => {
+const InputComponent = ({ size, placeholder, variant = 'outlined', style = {}, ...rests }) => {
   return (
     <Input
       size={size}
       placeholder={placeholder}
-      bordered={bordered}
-      style={style} // Truyền style đúng cách
-      {...rests} // Tránh lỗi props
+      variant={variant} // Thay thế bordered bằng variant
+      style={style}
+      {...rests}
     />
   );
 };
