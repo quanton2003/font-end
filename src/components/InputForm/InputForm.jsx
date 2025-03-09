@@ -1,15 +1,24 @@
-
-import React, { useState } from 'react'
+import React from 'react';
 import { WrapperIputStyle } from './style';
 
 const InputForm = (props) => {
-    const { valueInput, setValueInput } = useState('');
-    const {placeholder = 'Nhập text',...rests } = props;
-  return (
-  
-    <WrapperIputStyle placeholder={placeholder} valueInput={valueInput} {...rests}  />
-    
-  )
-}
+    const { placeholder = 'Nhập text', handleOnchange, ...rests } = props;
 
-export default InputForm
+    const handleOnchageInput = (e) => {
+        if (typeof handleOnchange === 'function') { // 🔥 Kiểm tra nếu handleOnchange tồn tại
+            handleOnchange(e.target.value);
+          
+        }
+    };
+
+    return (
+        <WrapperIputStyle
+            placeholder={placeholder}
+            value={props.value} // 🔥 Cần đảm bảo đúng key
+            {...rests}
+            onChange={handleOnchageInput}
+        />
+    );
+};
+
+export default InputForm;

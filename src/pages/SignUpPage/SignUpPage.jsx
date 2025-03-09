@@ -1,104 +1,146 @@
-import React, { useState } from 'react'
-import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './style'
-import InputForm from '../../components/InputForm/InputForm'
-import ButtonComponent from '../../components/ButttonComponent/ButttonComponent'
-import { Image } from 'antd'
+import React, { useState } from 'react';
+import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './style';
+import InputForm from '../../components/InputForm/InputForm';
+import ButtonComponent from '../../components/ButttonComponent/ButttonComponent';
+import { Image } from 'antd';
 import ImageLogo from '../../assets/Images/logologin.png';
-import { EyeFilled,EyeInvisibleFilled } from '@ant-design/icons'
+import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 
 const SignUpPage = () => {
-  const[isShowPassword, setIsShowPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const [isShowPassword, setIsShowPassword] = useState(false);
+  const [isShowConfirmPassword, setIsShowConfirmPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleOnchangeEmail = (value) => setEmail(value);
+  const handleOnchangePassword = (value) => setPassword(value);
+  const handleOnchangeConfirmPassword = (value) => setConfirmPassword(value);
+
+  const handleNavigateSignIn = () => {
+    navigate('/sign-in');
+  };
+
+  const handleSignUp = () => { // 🔥 Đổi tên từ `handlaSignUp` thành `handleSignUp`
+    console.log('sign-up', email, password, confirmPassword);
+  };
+
   return (
-    <div style={{ display: 'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.53)',height:'100vh' }} >
-        <div style={{ width: '800px', height: '445px', borderRadius: '6px', background: '#fff' , display: 'flex' }} >
-            <WrapperContainerLeft>
-                <h1>Xin chào</h1>
-                <p>Đăng nhập và tạo tài khoản</p>
-                <InputForm style={{ marginBottom:'10px' }} placeholder="quanvyyyb@gmail.com" />
-                   <div style={{ position:'relative' }}>
-                  <span
-                  style={{ 
-                    zIndex: 10,
-                    position: 'absolute',
-                      top: '4px',
-                      right: '8px'
-                   }}
-                  >{
-                    isShowPassword ? (
-                        <EyeFilled style={{ fontSize:'15px' }} />
-                    ):(
-                        <EyeInvisibleFilled style={{ fontSize:'13px', alignItems:'center',marginTop:'5px' }} />
-                    )
-                  }
-                  </span>
-                   </div>
-                   <InputForm style={{ marginBottom:'10px' }} placeholder="Password" />
-                   <div style={{ position:'relative' }}>
-                  <span
-                  style={{ 
-                    zIndex: 10,
-                    position: 'absolute',
-                      top: '4px',
-                      right: '8px'
-                   }}
-                  >
-                  </span>
-                   </div>
-                   <div style={{ position:'relative' }}>
-                  <span
-                  style={{ 
-                    zIndex: 10,
-                    position: 'absolute',
-                      top: '4px',
-                      right: '8px'
-                   }}
-                  >{
-                    isShowPassword ? (
-                        <EyeFilled style={{ fontSize:'15px' }} />
-                    ):(
-                        <EyeInvisibleFilled style={{ fontSize:'13px', alignItems:'center',marginTop:'5px' }} />
-                    )
-                  }
-                  </span>
-                   </div>
-                   <InputForm style={{ marginBottom:'10px' }} placeholder="Comfim Password" />
-                   <div style={{ position:'relative' }}>
-                  <span
-                  style={{ 
-                    zIndex: 10,
-                    position: 'absolute',
-                      top: '4px',
-                      right: '8px'
-                   }}
-                  >
-                  </span>
-                   </div>
-                   
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(0,0,0,0.53)',
+        height: '100vh',
+      }}
+    >
+      <div
+        style={{
+          width: '800px',
+          height: '445px',
+          borderRadius: '6px',
+          background: '#fff',
+          display: 'flex',
+        }}
+      >
+        <WrapperContainerLeft>
+          <h1>Xin chào</h1>
+          <p>Đăng nhập và tạo tài khoản</p>
 
-                <ButtonComponent
-                    size={20}
-                    styleButton={{
-                        background: 'rgb(255, 57,69)',
-                        height: '48px',
-                        width: '100%',
-                        borderRadius: '4px',
-                        border: 'none',
-                        margin: '26px 0 10px'
-                    }}
-                    textButton={'Đăng nhập'}
-                    styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}
-                >
-                </ButtonComponent>
-                <p>Chưa đã có tài khoản? <WrapperTextLight>Đăng Nhập</WrapperTextLight></p> 
+          {/* Email Input */}
+          <InputForm
+            style={{ marginBottom: '10px' }}
+            placeholder="Email"
+            value={email}
+            handleOnchange={handleOnchangeEmail}
+          />
 
-            </WrapperContainerLeft>
-            <WrapperContainerRight>
-                <Image src={ImageLogo} preview={false} alt='logo-image' height='203px' width='203px' />
-                <h4>Mua sắm tại đây</h4>
-            </WrapperContainerRight>
-        </div>
+          {/* Password Input */}
+          <div style={{ position: 'relative' }}>
+            <InputForm
+              type={isShowPassword ? 'text' : 'password'}
+              style={{ marginBottom: '10px' }}
+              placeholder="Mật khẩu"
+              value={password} // 🔥 Đặt `value` đúng chỗ
+              handleOnchange={handleOnchangePassword} // 🔥 Đặt `handleOnchange` đúng chỗ
+            />
+            <span
+              style={{
+                zIndex: 10,
+                position: 'absolute',
+                top: '4px',
+                right: '8px',
+                cursor: 'pointer',
+              }}
+              onClick={() => setIsShowPassword(!isShowPassword)}
+            >
+              {isShowPassword ? (
+                <EyeFilled style={{ fontSize: '15px' }} />
+              ) : (
+                <EyeInvisibleFilled style={{ fontSize: '15px' }} />
+              )}
+            </span>
+          </div>
+
+          {/* Confirm Password Input */}
+          <div style={{ position: 'relative' }}>
+            <InputForm
+              type={isShowConfirmPassword ? 'text' : 'password'}
+              style={{ marginBottom: '10px' }}
+              placeholder="Xác nhận mật khẩu"
+              value={confirmPassword} // 🔥 Đặt `value` đúng chỗ
+              handleOnchange={handleOnchangeConfirmPassword} // 🔥 Đặt `handleOnchange` đúng chỗ
+            />
+            <span
+              style={{
+                zIndex: 10,
+                position: 'absolute',
+                top: '4px',
+                right: '8px',
+                cursor: 'pointer',
+              }}
+              onClick={() => setIsShowConfirmPassword(!isShowConfirmPassword)}
+            >
+              {isShowConfirmPassword ? (
+                <EyeFilled style={{ fontSize: '15px' }} />
+              ) : (
+                <EyeInvisibleFilled style={{ fontSize: '15px' }} />
+              )}
+            </span>
+          </div>
+
+          <ButtonComponent
+            onClick={handleSignUp} // 🔥 Đổi từ `handlaSignUp` thành `handleSignUp`
+            size={20}
+            styleButton={{
+              background: 'rgb(255, 57,69)',
+              height: '48px',
+              width: '100%',
+              borderRadius: '4px',
+              border: 'none',
+              margin: '26px 0 10px',
+            }}
+            textButton={'Đăng Kí'}
+            styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}
+          />
+
+          <p>
+            Chưa có tài khoản?{' '}
+            <WrapperTextLight onClick={handleNavigateSignIn}>Đăng Nhập</WrapperTextLight>
+          </p>
+        </WrapperContainerLeft>
+
+        <WrapperContainerRight>
+          <Image src={ImageLogo} preview={false} alt="logo-image" height="203px" width="203px" />
+          <h4>Mua sắm tại đây</h4>
+        </WrapperContainerRight>
+      </div>
     </div>
-)
-}
+  );
+};
 
-export default SignUpPage
+export default SignUpPage;
