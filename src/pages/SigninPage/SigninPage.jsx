@@ -27,7 +27,7 @@ const SigninPage = () => {
     if (isSuccess && data?.status === "OK") {
       message.success("Đăng nhập thành công!");
       navigate('/');
-      localStorage.setItem('token', data?.access_token); // Đảm bảo dùng đúng key
+      localStorage.setItem('access_token',JSON.stringify(data?.access_token)); // Đảm bảo dùng đúng key
       console.log("Token từ localStorage:", localStorage.getItem("token")); // Kiểm tra lại
       
       
