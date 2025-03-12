@@ -1,25 +1,54 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './style';
 import InputForm from '../../components/InputForm/InputForm';
 import ButtonComponent from '../../components/ButttonComponent/ButttonComponent';
-import { Image } from 'antd';
+import { Image, Spin, message } from 'antd';
 import ImageLogo from '../../assets/Images/logologin.png';
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import * as UserService from '../../services/UserService';
+import { useMutationHooks } from '../../hooks/useMutationHooks';
+import Loading from '../../components/LoadingComponent/Loading';
+import { jwtDecode } from "jwt-decode"; // ✅ Đúng cú pháp mới
+import { useDispatch } from 'react-redux'
+import { updateUser } from '../../redux/sides/userSlide';
 
 const SigninPage = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleOnchangeEmail = (value) => setEmail(value);
-  const handleOnchangePassword = (value) => setPassword(value);
-  const handleNavigateSignUp = () => {
-    navigate('/sign-up');
+  // ✅ Chỉ gọi useMutationHooks MỘT LẦN
+  const { mutate, data, isLoading, isSuccess, } = useMutationHooks(UserService.loginUser);
+
+  useEffect(() => {
+    if (isSuccess && data?.status === "OK") {
+      message.success("Đăng nhập thành công!");
+      navigate('/');
+      localStorage.setItem('token', data?.access_token); // Đảm bảo dùng đúng key
+      console.log("Token từ localStorage:", localStorage.getItem("token")); // Kiểm tra lại
+      
+      
+      if (data?.access_token) {
+        const decodedToken = jwtDecode(data?.access_token)
+        console.log('decodedToken ', decodedToken);
+        if (decodedToken?.id) {
+          handleGetDetailsUser(decodedToken?.id, data?.access_token)
+        }
+      }
+    }
+  }, [isSuccess, data]);
+  const handleGetDetailsUser = async (id, token) => {
+    const res = await UserService.getDetailsUser(id, token)
+    dispatch(updateUser({...res?.data,access_token: token}))
+  }
+
+  const handleSignIn = () => {
+    mutate({ email, password });
   };
 
-  const isButtonDisabled = !email.length || !password.length;
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.53)', height: '100vh' }}>
@@ -27,59 +56,43 @@ const SigninPage = () => {
         <WrapperContainerLeft>
           <h1>Xin chào</h1>
           <p>Đăng nhập và tạo tài khoản</p>
-          <InputForm
-            style={{ marginBottom: '10px' }}
-            placeholder="Email"
-            value={email}
-            handleOnchange={handleOnchangeEmail}
-          />
+          <InputForm placeholder="Email" value={email} handleOnchange={setEmail} style={{ marginBottom: '10px' }} />
           <div style={{ position: 'relative' }}>
-            <InputForm
-              placeholder="Mật khẩu"
-              type={isShowPassword ? 'text' : 'password'}
-              value={password}
-              handleOnchange={handleOnchangePassword}
-            />
-            <span
-              onClick={() => setIsShowPassword((prev) => !prev)}
-              style={{
-                zIndex: 10,
-                position: 'absolute',
-                top: '4px',
-                right: '8px',
-                cursor: 'pointer'
-              }}
-            >
-              {isShowPassword ? (
-                <EyeFilled style={{ fontSize: '15px' }} />
-              ) : (
-                <EyeInvisibleFilled style={{ fontSize: '13px' }} />
-              )}
+            <InputForm placeholder="Mật khẩu" type={isShowPassword ? 'text' : 'password'} value={password} handleOnchange={setPassword} />
+            <span onClick={() => setIsShowPassword((prev) => !prev)} style={{ position: 'absolute', top: '4px', right: '8px', cursor: 'pointer' }}>
+              {isShowPassword ? <EyeFilled style={{ fontSize: '15px' }} /> : <EyeInvisibleFilled style={{ fontSize: '13px' }} />}
             </span>
           </div>
 
-          <ButtonComponent
-            size={20}
-            styleButton={{
-              background: isButtonDisabled ? 'gray' : 'rgb(255, 57,69)',
-              height: '48px',
-              width: '100%',
-              borderRadius: '4px',
-              border: 'none',
-              margin: '26px 0 10px',
-              cursor: isButtonDisabled ? 'not-allowed' : 'pointer'
-            }}
-            textButton={'Đăng nhập'}
-            styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}
-            disabled={isButtonDisabled}
-          />
+          {data?.status === 'ERR' && <span style={{ color: 'red', fontSize: "12px" }}>{data?.message}</span>}
+
+          {/* ✅ Chỉ loading khi gọi API */}
+          <Loading isLoading={isLoading}>
+            <ButtonComponent
+              onClick={handleSignIn}
+              size={20}
+              styleButton={{
+                background: !email || !password ? 'gray' : 'rgb(255, 57,69)',
+                height: '48px',
+                width: '100%',
+                borderRadius: '4px',
+                border: 'none',
+                margin: '26px 0 10px',
+                cursor: !email || !password ? 'not-allowed' : 'pointer'
+              }}
+              textButton={isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+              styleTextButton={{ color: '#fff', fontSize: '15px', fontWeight: '700' }}
+              disabled={!email || !password || isLoading}
+            />
+          </Loading>
+
+
+
+
 
           <WrapperTextLight>Quên mật khẩu</WrapperTextLight>
-          <p>
-            Chưa có tài khoản? <WrapperTextLight onClick={handleNavigateSignUp}>Tạo tài khoản</WrapperTextLight>
-          </p>
+          <p>Chưa có tài khoản? <WrapperTextLight onClick={() => navigate('/sign-up')}>Tạo tài khoản</WrapperTextLight></p>
         </WrapperContainerLeft>
-
         <WrapperContainerRight>
           <Image src={ImageLogo} preview={false} alt="logo-image" height="203px" width="203px" />
           <h4>Mua sắm tại đây</h4>
