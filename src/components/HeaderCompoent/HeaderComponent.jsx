@@ -1,5 +1,5 @@
-import { Badge, Button, Col, Popover } from 'antd'
-import React, { useState } from 'react'
+import { Badge, Col, Popover } from 'antd'
+import React, { useEffect, useState } from 'react'
 import { WrapperContentPopup, WrapperHeader, WrapperHeaderAccout, WrapperTextHeader, WrapperTextHeaderSmall } from './style'
 import {
   CaretDownOutlined,
@@ -16,6 +16,8 @@ const HeaderComponent = () => {
   const navigate = useNavigate()
   const user = useSelector((state) => state.user)
   const dispatch = useDispatch()
+  const [userName,setUserName] = useState('')
+  const [userAvatar,setUserAvatar] = useState('')
   const [loading,setloading] = useState(false)
   const handlaNavigateLogin = () => {
     navigate('/sign-in')
@@ -30,7 +32,12 @@ const HeaderComponent = () => {
     
     setloading(false);
   };
-  
+  useEffect(()=>{
+    setloading(true);
+  setUserName(user?.name)
+  setUserAvatar(user?.avatar)
+    setloading(false);
+  },[user.name,user?.avatar])
 
   const content = (
     <div>
@@ -56,12 +63,17 @@ const HeaderComponent = () => {
         <Col span={6} style={{ display: 'flex', gap: '54px', alignItems: 'center' }} >
           <Loading isLoading={loading}>
           <WrapperHeaderAccout>
-            <UserOutlined style={{ fontSize: '30px' }} />
-            {user?.name ? (
+            {userAvatar ?(
+              <img src={userAvatar}style={{ width: "50px", height: "50px", objectFit: "cover" ,borderRadius:'50%'}} alt="avata" />
+            ):(
+              <UserOutlined style={{ fontSize: '30px' }} />
+            )}
+           
+            {user?.access_token ? (
               <>
-               
                 <Popover content={content} trigger="click">
-                <div style={{ cursor: 'pointer' }} >{user.name}</div>
+                <div style={{ cursor: 'pointer' }} >{userName?.length ? userName : user?.email }</div>
+
                 </Popover>
               </>
             ) : (

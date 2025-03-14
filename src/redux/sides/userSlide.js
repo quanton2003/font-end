@@ -1,30 +1,48 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit";
+
+const storedUser = JSON.parse(localStorage.getItem("user")) || {}; // Lấy user từ localStorage
 
 const initialState = {
-  value: '',
-  email: '',
-  access_token:'',
-}
+  id: storedUser.id || null,
+  email: storedUser.email || "",
+  name: storedUser.name || "",
+  phone: storedUser.phone || "",
+  address: storedUser.address || "",
+  avatar: storedUser.avatar || "",
+  access_token: storedUser.access_token || null,
+};
 
 export const userSlide = createSlice({
-  name: 'counter',
+  name: "user",
   initialState,
   reducers: {
-    updateUser:(state,action)=>{
-     const {name,email,access_token} = action.payload
-     state.name = name||email;
-     state.email= email;
-     state.access_token = access_token
+    updateUser: (state, action) => {
+      const { name, email, access_token, phone, address, avatar, _id } = action.payload;
+      state.id = _id;
+      state.name = name;
+      state.email = email;
+      state.phone = phone;
+      state.address = address;
+      state.avatar = avatar;
+      state.access_token = access_token;
+
+      // ✅ Lưu user vào localStorage để giữ trạng thái sau F5
+      localStorage.setItem("user", JSON.stringify(state));
     },
-    resetUser:(state)=>{
-      state.name ="";
-      state.email= "";
-      state.access_token = ""
-     }
+    resetUser: (state) => {
+      state.id = null;
+      state.name = "";
+      state.email = "";
+      state.access_token = null;
+      state.phone = "";
+      state.address = "";
+      state.avatar = "";
+
+      // ❌ Xóa user khỏi localStorage khi logout
+      localStorage.removeItem("user");
+    },
   },
-})
+});
 
-// Action creators are generated for each case reducer function
-export const { updateUser,resetUser } = userSlide.actions
-
-export default userSlide.reducer
+export const { updateUser, resetUser } = userSlide.actions;
+export default userSlide.reducer;

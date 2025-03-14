@@ -14,7 +14,7 @@ const InputForm = (props) => {
     return (
         <WrapperIputStyle
             placeholder={placeholder}
-            value={props.value} // 🔥 Cần đảm bảo đúng key
+            value={props.value} 
             {...rests}
             onChange={handleOnchageInput}
         />
