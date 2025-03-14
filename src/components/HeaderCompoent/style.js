@@ -28,3 +28,10 @@ font-size: 12px;
 color: white;
 white-space: nowrap;
 `
+export const WrapperContentPopup = styled.p `
+    cursor: pointer;
+    &:hover {
+        background: rgb(26,148,255);
+        color: #fff;
+    }
+`
