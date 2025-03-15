@@ -1,3 +1,4 @@
+import AdminPage from "../pages/AdminPage/AdminPage";
 import HomPages from "../pages/HomePage/HomPages";
 import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import OrderPage from "../pages/OrderPage/OrderPage";
@@ -42,6 +43,12 @@ export const routes = [
     path: '/profile-user',
     page: ProfilePage,
     isShowHeader: true
+  },
+  {
+    path: "/system-admin", // ✅ Đảm bảo đây là string
+    page: AdminPage,
+    isShowHeader: false,
+    isPrivate: true,
   },
   {
     path: '*',

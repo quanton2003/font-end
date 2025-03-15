@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { routes } from './routes';
 import DefaultCompoent from './components/DefaultCompoent/DefaultCompoent';
@@ -7,18 +7,14 @@ import { useQuery } from '@tanstack/react-query';
 import { isJsonString } from './services/utils';
 import { jwtDecode } from 'jwt-decode';
 import * as UserService from './services/UserService';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { updateUser } from './redux/sides/userSlide';
+import Loading from './components/LoadingComponent/Loading';
 
 function App() {
   const dispatch = useDispatch();
-
-  const handleGetDetailsUser = async (id, token) => {
-    const res = await UserService.getDetailsUser(id, token);
-    dispatch(updateUser({ ...res?.data, access_token: token }));
-  };
-
-  console.log('REACT_APP_API_URL', process.env.REACT_APP_API_URL);
+  const [isLoading, setIsLoading] = useState(false);
+  const user = useSelector((state)=>state.user)
 
   const fetchApi = async () => {
     const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/get-all`);
@@ -30,8 +26,8 @@ function App() {
   console.log('query', query);
 
   useEffect(() => {
+    setIsLoading(true)
     const { storageData, decodedToken } = handleDecoded();
-
     if (decodedToken?.id && storageData) {  // ✅ Kiểm tra token có tồn tại không
         handleGetDetailsUser(decodedToken?.id, storageData);
     }
@@ -48,6 +44,11 @@ function App() {
     }
 
     return { decodedToken, storageData };
+  };
+  const handleGetDetailsUser = async (id, token) => {
+    const res = await UserService.getDetailsUser(id, token);
+    dispatch(updateUser({ ...res?.data, access_token: token }));
+    setIsLoading(false)
   };
 
   UserService.axiosJwt.interceptors.request.use(
@@ -80,31 +81,41 @@ function App() {
     function (error) {
         return Promise.reject(error);
     }
-);
+)
 
 
   return (
     <div>
+      <Loading isLoading={isLoading} >  
       <Router>
-        <Routes>
-          {routes.map((route) => {
-            const Page = route.page;
-            const Layout = route.isShowHeader ? DefaultCompoent : Fragment;
+      <Routes>
+  {routes
+    .filter((route) => typeof route.path === "string") // ✅ Lọc các route có path là string
+    .map((route) => {
+      if (!route.path) return null // ✅ Kiểm tra path không bị undefined/null
 
-            return (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={
-                  <Layout>
-                    <Page />
-                  </Layout>
-                }
-              />
-            );
-          })}
-        </Routes>
+      const Page = route.page;
+      const ischeckAuth = !route.isPrivate || user.isAdmin;
+      const Layout = route.isShowHeader ? DefaultCompoent : Fragment;
+
+      return ischeckAuth ? (
+        <Route
+          key={route.path}
+          path={route.path}
+          element={
+            <Layout>
+              <Page />
+            </Layout>
+          }
+        />
+      ) : null
+      
+    })}
+</Routes>;
+
+
       </Router>
+      </Loading>
     </div>
   );
 }

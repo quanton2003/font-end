@@ -10,6 +10,7 @@ const initialState = {
   address: storedUser.address || "",
   avatar: storedUser.avatar || "",
   access_token: storedUser.access_token || null,
+  isAdmin: false
 };
 
 export const userSlide = createSlice({
@@ -17,7 +18,7 @@ export const userSlide = createSlice({
   initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { name, email, access_token, phone, address, avatar, _id } = action.payload;
+      const { name, email, access_token, phone, address, avatar, _id, isAdmin } = action.payload;
       state.id = _id;
       state.name = name;
       state.email = email;
@@ -25,6 +26,7 @@ export const userSlide = createSlice({
       state.address = address;
       state.avatar = avatar;
       state.access_token = access_token;
+      state.isAdmin = isAdmin; 
 
       // ✅ Lưu user vào localStorage để giữ trạng thái sau F5
       localStorage.setItem("user", JSON.stringify(state));
@@ -37,6 +39,7 @@ export const userSlide = createSlice({
       state.phone = "";
       state.address = "";
       state.avatar = "";
+      state.isAdmin = false;
 
       // ❌ Xóa user khỏi localStorage khi logout
       localStorage.removeItem("user");
