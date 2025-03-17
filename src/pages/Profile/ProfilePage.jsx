@@ -167,14 +167,14 @@ const ProfilePage = () => {
         <WrapperInput>
             <WrapperLaber htmlFor='avatar' >Avatar</WrapperLaber>
             <Upload 
-  listType="picture-card" 
-  showUploadList={false} 
-  beforeUpload={() => false} // Ngăn chặn upload ngay lập tức
-  onChange={handleOnchangeAvatar} // ✅ Gọi đúng function
->
-  {avatar ? (
-    <img src={avatar} alt="avatar" style={{ width: "100px", height: "100px", objectFit: "cover" }} />
-  ) : (
+              listType="picture-card" 
+              showUploadList={false} 
+              beforeUpload={() => false} // Ngăn chặn upload ngay lập tức
+              onChange={handleOnchangeAvatar} // ✅ Gọi đúng function
+            >
+                {avatar ? (
+                  <img src={avatar} alt="avatar" style={{ width: "100px", height: "100px", objectFit: "cover" }} />
+                ) : (
     <Button icon={<UploadOutlined />}>Tải ảnh</Button>
   )}
 </Upload>
