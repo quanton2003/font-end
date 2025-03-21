@@ -2,31 +2,33 @@ import axios from "axios";
 import { store } from "../redux/store";
 import { resetUser } from "../redux/sides/userSlide";
 
-export const axiosJwt = axios.create()
+export const axiosJwt = axios.create();
+
+// ✅ Interceptor xử lý tự động refresh token khi bị 401
 axiosJwt.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
+    // Nếu lỗi 401 (Unauthorized) & request chưa retry lần nào => Thử refresh token
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
-        // Gọi API để refresh token
-        const res = await refreshToken();
+        const res = await refreshToken(); // 🛠 Gọi API refresh token
         if (res?.access_token) {
-          // Cập nhật token mới vào Redux
+          // ✅ Cập nhật token mới vào Redux + LocalStorage
           const user = JSON.parse(localStorage.getItem("user")) || {};
           user.access_token = res.access_token;
           localStorage.setItem("user", JSON.stringify(user));
           store.dispatch(updateUser(user));
 
-          // Gán token mới vào headers và gọi lại request bị lỗi
-          originalRequest.headers["token"] = `Bearer ${res.access_token}`;
+          // ✅ Gán token mới vào headers & retry request
+          originalRequest.headers["Authorization"] = `Bearer ${res.access_token}`;
           return axiosJwt(originalRequest);
         }
       } catch (err) {
-        console.error("Refresh token failed:", err);
-        store.dispatch(resetUser()); // Logout nếu refresh thất bại
+        console.error("❌ Refresh token failed:", err);
+        store.dispatch(resetUser()); // ❌ Logout nếu refresh thất bại
       }
     }
     return Promise.reject(error);
@@ -67,14 +69,16 @@ export const getDetailsUser = async (id) => {
 export const refreshToken = async () => {
   try {
       const res = await axios.post(`${process.env.REACT_APP_API_URL}/user/refresh-token`, {}, {
-          withCredentials: true  // ✅ Bắt buộc để gửi cookie lên server
+          withCredentials: true  // ✅ Quan trọng để gửi cookies refresh token
       });
+      console.log("✅ Token refreshed:", res.data.access_token); // Debug xem có lấy được token không
       return res.data;
   } catch (error) {
-      console.error('Lỗi refresh token:', error);
+      console.error('❌ Lỗi refresh token:', error);
       throw error;
   }
 };
+
 
 
 

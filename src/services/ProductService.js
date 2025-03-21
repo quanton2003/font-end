@@ -1,9 +1,9 @@
-import axios from 'axios'
+// import axios from 'axios'
 import { axiosJwt } from './UserService';
 
 export const getAllProduct = async () => {
     try {
-        const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/get-all`);
+        const res = await axiosJwt.get(`${process.env.REACT_APP_API_URL}/product/get-all`);
         return res.data;
     } catch (error) {
         console.error("Lỗi khi lấy danh sách sản phẩm:", error);
@@ -13,13 +13,13 @@ export const getAllProduct = async () => {
 
 
 export const createProduct = async (data) => {
-    const res = await axios.post(`${process.env.REACT_APP_API_URL}/product/create`,data)
+    const res = await axiosJwt.post(`${process.env.REACT_APP_API_URL}/product/create`,data)
 
     return res.data;
 
 };
 export const getDetailsProduct = async (id) => {
-    const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/details-product/${id}`)
+    const res = await axiosJwt.get(`${process.env.REACT_APP_API_URL}/product/details-product/${id}`)
 
     return res.data;
 
@@ -37,3 +37,16 @@ export const updateProduct = async (id, access_token, data) => {
     );
     return res.data;
 };
+
+export const deleteProduct = async (id,token) => {
+    const res = await axiosJwt.delete(
+      `${process.env.REACT_APP_API_URL}/product/delete-product/${id}`,
+      {
+        headers: {
+            token: `Bearer ${token}`,
+        }
+    }
+    );
+  
+    return res.data;
+  };

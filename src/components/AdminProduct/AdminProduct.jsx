@@ -13,6 +13,8 @@ import { useQuery } from '@tanstack/react-query';
 import DrawerComponent from '../DrawerComponent/DrawerComponent';
 import useSelection from 'antd/es/table/hooks/useSelection';
 import { useSelector } from 'react-redux';
+import { useQueryClient } from '@tanstack/react-query';
+import ModalComponent from '../ModalComponent/ModalComponent';
 const AdminProduct = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rowSelected, setRowSelected] = useState('');
@@ -20,6 +22,8 @@ const AdminProduct = () => {
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [fileListCreate, setFileListCreate] = useState([]);
   const [fileListDetails, setFileListDetails] = useState([]);
+  const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
+
   const user = useSelector((state) => state?.user);
   const [stateProduct, setStateProduct] = useState({
     name: '',
@@ -44,90 +48,130 @@ const AdminProduct = () => {
   const [fileList, setFileList] = useState([]);
   const [formCreate] = Form.useForm();
   const [formDetails] = Form.useForm();
-
+  const queryClient = useQueryClient();
   // ✅ Lấy danh sách sản phẩm
   const getAllProduct = async () => {
     try {
       const res = await ProductService.getAllProduct();
-      return res?.data || []; // Tránh lỗi undefined
+      return res?.data || [];
     } catch (error) {
       console.error('Lỗi khi fetch sản phẩm:', error);
       return [];
     }
   };
+  
 
-  const { isLoading: isLoadingProduct, data: products } = useQuery({
+  const queryProduct = useQuery({
     queryKey: ['products'],
     queryFn: getAllProduct,
-    initialData: [],
+    staleTime: 5000, // Giữ dữ liệu trong 5 giây trước khi fetch lại
   });
+  const { isLoading: isLoadingProduct, data: products } = queryProduct
+  
 
   // ✅ Lấy chi tiết sản phẩm
-  const fetchGetDetailsProduct = async (rowSelected) => {
-    if (!rowSelected) return;
-
-    setIsLoadingUpdate(true);
-    try {
-      const res = await ProductService.getDetailsProduct(rowSelected);
-      if (res?.data) {
-        setStateProductDetails({
-          name: res.data.name,
-          price: res.data.price,
-          description: res.data.description,
-          rating: res.data.rating,
-          image: res.data.image,
-          type: res.data.type,
-          countInStock: res.data.countInStock,
-        });
-      }
-    } catch (error) {
-      console.error('❌ Lỗi khi gọi API:', error.response?.data || error.message);
+ const fetchGetDetailsProduct = async (rowSelected) => {
+  if (!rowSelected) return;
+  setIsLoadingUpdate(true);
+  try {
+    const res = await ProductService.getDetailsProduct(rowSelected);
+    if (res?.data) {
+      setStateProductDetails({
+        ...res.data,
+      });
     }
+  } catch (error) {
+    console.error('❌ Lỗi khi gọi API:', error.response?.data || error.message);
+  } finally {
     setIsLoadingUpdate(false);
-  };
-
-  useEffect(() => {
-    if (rowSelected) fetchGetDetailsProduct(rowSelected);
-  }, [rowSelected]);
-
+  }
+};
   useEffect(() => {
     if (formDetails && stateProductDetails) {
       formDetails.setFieldsValue(stateProductDetails);
     }
   }, [stateProductDetails]);
 
+  useEffect(() => {
+    if (rowSelected) {
+      fetchGetDetailsProduct(rowSelected);
+    }
+  }, [rowSelected]);
   // ✅ Tạo sản phẩm
-  const mutation = useMutationHooks((data) => ProductService.createProduct(data));
+  const mutation = useMutationHooks((data) => ProductService.createProduct(data), {
+
+  });
   const { data, isLoading, isSuccess, isError } = mutation;
 
   // ✅ Cập nhật sản phẩm
   const mutationUpdate = useMutationHooks((data) => {
-    const { id, token, ...rests } = data;
-    return ProductService.updateProduct(id, token, rests);
-  });
-  
+    const { id, token,...rests } = data;
+    const res =  ProductService.updateProduct(id, token,{...rests})
+    return res;
+  })
 
+
+  const mutationDelete = useMutationHooks((data) => {
+    const { id, token } = data;
+    const res =  ProductService.deleteProduct(id, token)
+    return res;
+  })
+  useEffect(() => {
+    if (formDetails && stateProductDetails && Object.keys(stateProductDetails).length > 0) {
+      formDetails.setFieldsValue(stateProductDetails);
+    }
+  }, );
   const { data: dataUpdate, isSuccess: isSuccessUpdate, isError: isErrorUpdate } = mutationUpdate;
-
+  const {data: dataDeleted, isLoading: isLoadingDeleted, isSuccess: isSuccessDeleted, isError:isErrorDeleted } = mutationDelete ;
   // ✅ Xử lý khi chi tiết sản phẩm được chọn
   const handleDetailsProduct = () => {
     if (rowSelected) {
-      fetchGetDetailsProduct(rowSelected);
+      // fetchGetDetailsProduct(rowSelected);
       setIsOpenDrawer(true);
     }
   };
   // ✅ Xử lý cập nhật sản phẩm
+  const latestToken = useSelector((state) => state?.user?.access_token); // Gọi bên ngoài
+
   const onUpdateProduct = () => {
-    if (!user?.access_token) {
+    if (!latestToken) {
       message.error('Bạn chưa đăng nhập!');
       return;
     }
     mutationUpdate.mutate({
-      id: rowSelected,
-      token: user?.access_token,
+      id: rowSelected, // 🛑 Kiểm tra rowSelected có giá trị không?
+      token: latestToken,
       ...stateProductDetails,
+    },{
+        onSettled: ()=>{
+          queryProduct.refetch()
+        }
     });
   };
+
+  // ✅ Xử lý xóa sản phẩm
+  const handleDeleteProduct = () => {
+    if (!rowSelected) {
+      console.error("🛑 Không có sản phẩm nào được chọn để xoá!");
+      return;
+    }
+  
+    mutationDelete.mutate(
+      {
+        id: rowSelected,
+        token: latestToken,
+      },
+      {
+        onSettled: () => {
+          queryProduct.refetch()
+          handleCancelDelete(true)
+        },
+      
+      }
+    );
+  };
+  
+  
   const onFinish = () => {
     mutation.mutate(stateProduct);
   };
@@ -146,14 +190,16 @@ const AdminProduct = () => {
       dataIndex: 'action',
       render: () => (
         <div>
-          <DeleteOutlined style={{ color: 'red', fontSize: '30px', cursor: 'pointer' }} />
+          <DeleteOutlined style={{ color: 'red', fontSize: '30px', cursor: 'pointer' }} onClick={() => setIsModalOpenDelete(true)} />
           <EditOutlined style={{ color: 'orange', fontSize: '30px', cursor: 'pointer' }} onClick={handleDetailsProduct} />
         </div>
       ),
     },
   ];
 
-  const dataTable = products?.map((product) => ({ ...product, key: product._id }));
+  const dataTable = Array.isArray(products) ? products.map((product) => ({ ...product, key: product._id })) : [];
+
+
 
   useEffect(() => {
     if (isSuccess && data?.status === 'OK') {
@@ -173,6 +219,18 @@ const AdminProduct = () => {
     }
   }, [isSuccessUpdate, isErrorUpdate]);
 
+  useEffect(() => {
+    if (isSuccessDeleted && dataDeleted?.status === 'OK') {
+      massage.success('Xoá Thành công');
+      setIsOpenDrawer(false)
+    } else if (isErrorDeleted && dataDeleted?.status === 'ERR') {
+      massage.error('Thất bại');
+    }
+  }, [isSuccessDeleted, isErrorDeleted]);
+
+  const handleCancelDelete = () =>{
+    setIsModalOpenDelete(false);
+  }
   const handleCancel = (reset = false) => {
     setIsModalOpen(false);
     if (reset) {
@@ -200,6 +258,7 @@ const AdminProduct = () => {
       }
     }
   };
+  
 
   const handleOnchangeAvatarDetails = async ({ fileList }) => {
     setFileListDetails(fileList);
@@ -255,7 +314,7 @@ const AdminProduct = () => {
 
         />
       </div>
-      <Modal
+      <ModalComponent
         footer={null}
         title="Tạo sản phẩm"
         open={isModalOpen}
@@ -326,7 +385,7 @@ const AdminProduct = () => {
             </Form.Item>
           </Form>
         </Loading>
-      </Modal>
+      </ModalComponent>
       <DrawerComponent title='Chi tiết sản phẩm' isOpen={isOpenDrawer} onClose={() => setIsOpenDrawer(false)} width="90%" >
         <Loading isLoading={isLoading}>
           <Form
@@ -393,6 +452,18 @@ const AdminProduct = () => {
           </Form>
         </Loading>
       </DrawerComponent>
+      <ModalComponent
+        title="Xoá sản phẩm"s
+        open={isModalOpenDelete}
+        onCancel={handleCancelDelete}
+        onOk={handleDeleteProduct}
+      >
+        <Loading isLoading={isLoadingDeleted}>
+         <div>
+          Bạn chắn chắn muốn xoá
+         </div>
+        </Loading>
+      </ModalComponent>
     </div>
   );
 };

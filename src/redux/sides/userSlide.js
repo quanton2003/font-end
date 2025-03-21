@@ -10,7 +10,7 @@ const initialState = {
   address: storedUser.address || "",
   avatar: storedUser.avatar || "",
   access_token: storedUser.access_token || null,
-  isAdmin: false
+  isAdmin: storedUser.isAdmin || false, // 🔹 Tránh undefined
 };
 
 export const userSlide = createSlice({
@@ -18,28 +18,33 @@ export const userSlide = createSlice({
   initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { name, email, access_token, phone, address, avatar, _id, isAdmin } = action.payload;
-      state.id = _id;
-      state.name = name;
-      state.email = email;
-      state.phone = phone;
-      state.address = address;
-      state.avatar = avatar;
-      state.access_token = access_token;
-      state.isAdmin = isAdmin; 
+      const { _id, name, email, access_token, phone, address, avatar, isAdmin } = action.payload;
+      state.id = _id || state.id; // 🔹 Giữ giá trị cũ nếu không có _id
+      state.name = name || state.name;
+      state.email = email || state.email;
+      state.phone = phone || state.phone;
+      state.address = address || state.address;
+      state.avatar = avatar || state.avatar;
+      state.access_token = access_token || state.access_token;
+      state.isAdmin = isAdmin ?? state.isAdmin; // 🔹 Giữ giá trị hiện tại nếu isAdmin là undefined
 
-      // ✅ Lưu user vào localStorage để giữ trạng thái sau F5
-      localStorage.setItem("user", JSON.stringify(state));
+      // ✅ Chỉ lưu các dữ liệu quan trọng vào localStorage
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: state.id,
+          name: state.name,
+          email: state.email,
+          phone: state.phone,
+          address: state.address,
+          avatar: state.avatar,
+          access_token: state.access_token,
+          isAdmin: state.isAdmin,
+        })
+      );
     },
     resetUser: (state) => {
-      state.id = null;
-      state.name = "";
-      state.email = "";
-      state.access_token = null;
-      state.phone = "";
-      state.address = "";
-      state.avatar = "";
-      state.isAdmin = false;
+      Object.assign(state, initialState); // 🔥 Reset toàn bộ state
 
       // ❌ Xóa user khỏi localStorage khi logout
       localStorage.removeItem("user");

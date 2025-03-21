@@ -26,12 +26,14 @@ axiosJwt.interceptors.response.use(
           store.dispatch(updateUser(user));
 
           // ✅ Gắn token mới vào request cũ & gửi lại
+          axiosJwt.defaults.headers.common["Authorization"] = `Bearer ${res.access_token}`;
           originalRequest.headers["Authorization"] = `Bearer ${res.access_token}`;
+
           return axiosJwt(originalRequest);
         }
       } catch (err) {
         console.error("🔴 Refresh token thất bại:", err);
-        store.dispatch(resetUser()); // Nếu refresh thất bại → Đăng xuất
+        store.dispatch(resetUser()); // ❌ Xóa thông tin người dùng khi thất bại
       }
     }
     return Promise.reject(error);
