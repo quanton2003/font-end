@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './style';
 import InputForm from '../../components/InputForm/InputForm';
 import ButtonComponent from '../../components/ButttonComponent/ButttonComponent';
-import { Image, Spin, message } from 'antd';
+import { Image, message } from 'antd';
 import ImageLogo from '../../assets/Images/logologin.png';
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';

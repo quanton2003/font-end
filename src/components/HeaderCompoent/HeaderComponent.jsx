@@ -11,7 +11,7 @@ import Loading from '../LoadingComponent/Loading';
 
 const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user) || {};
+  const user = useSelector((state) => state.user ?? {});
   const dispatch = useDispatch();
   const [userName, setUserName] = useState('');
   const [userAvatar, setUserAvatar] = useState('');
@@ -20,13 +20,18 @@ const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
   const handleNavigateLogin = () => {
     navigate('/sign-in');
   };
-
   const handleLogOut = async () => {
     setLoading(true);
-    await UserService.logOutUser(); // Gọi API logout
-    localStorage.removeItem('access_token'); // Xóa token trong localStorage
-    dispatch(resetUser()); // Reset user trong Redux
-    setLoading(false);
+    try {
+      await UserService.logOutUser(); // Gọi API logout
+      localStorage.removeItem("access_token"); // Xóa token trong localStorage
+      dispatch(resetUser()); // Reset Redux state
+      navigate("/sign-in"); // Chuyển hướng về trang đăng nhập
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

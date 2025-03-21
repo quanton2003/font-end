@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { WrapperContainerLeft, WrapperContainerRight, WrapperTextLight } from './style';
 import InputForm from '../../components/InputForm/InputForm';
 import ButtonComponent from '../../components/ButttonComponent/ButttonComponent';
-import { Image, message } from 'antd';
+import { Image } from 'antd';
 import ImageLogo from '../../assets/Images/logologin.png';
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -24,10 +24,10 @@ const SignUpPage = () => {
   const { mutate, data, isLoading, isSuccess, isError } = useMutationHooks(UserService.signupUser);
   useEffect(() => {
     if (isSuccess && data?.status === "OK") { 
-      message.success("Đăng ký thành công!");
+      massage.success("Đăng ký thành công!");
       handleNavigateSignIn();
     } else if (isError || data?.status === "ERR") {
-      message.error(data?.message || "Đăng ký thất bại!");
+      massage.error(data?.message || "Đăng ký thất bại!");
     }
   }, [isSuccess, isError, data]);
   

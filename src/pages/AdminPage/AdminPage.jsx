@@ -1,7 +1,7 @@
 import { Menu } from 'antd';
 import React, { useState } from 'react';
 import { getItem } from '../../services/utils';
-import { AppstoreOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { AppstoreOutlined, UserOutlined } from '@ant-design/icons';
 import HeaderComponent from '../../components/HeaderCompoent/HeaderComponent';
 import AdminUser from '../../components/AdminUser/AdminUser';
 import AdminProduct from '../../components/AdminProduct/AdminProduct';

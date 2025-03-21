@@ -12,6 +12,7 @@
     "@testing-library/user-event": "^13.5.0",
     "antd": "^5.24.2",
     "axios": "^1.8.2",
+    "axios-jwt": "^4.0.3",
     "dotenv": "^16.4.7",
     "jwt-decode": "^4.0.0",
     "react": "^18.3.1",
@@ -48,5 +49,5 @@
       "last 1 safari version"
     ]
   },
-  "proxy":"http://localhost:3001/"
+  "proxy": "http://localhost:3001/"
 }

@@ -86,7 +86,7 @@ function App() {
 
   return (
     <div>
-      <Loading isLoading={isLoading} >  
+      {/* <Loading isLoading={isLoading} >   */}
       <Router>
       <Routes>
   {routes
@@ -115,7 +115,7 @@ function App() {
 
 
       </Router>
-      </Loading>
+      {/* </Loading> */}
     </div>
   );
 }
