@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { WrapperHeader } from './style';
-import { Button, Form, message, Modal, Upload } from 'antd';
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Form, message, Modal, Space, Upload } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import TableComponent from '../TableComponent/TableComponent';
 import InputComponent from '../inputComponent/inputComponent';
 import { getBase64 } from '../../services/utils';
@@ -23,7 +23,9 @@ const AdminProduct = () => {
   const [fileListCreate, setFileListCreate] = useState([]);
   const [fileListDetails, setFileListDetails] = useState([]);
   const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
-
+  const [searchText, setSearchText] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState('');
+  const searchInput = useRef(null);
   const user = useSelector((state) => state?.user);
   const [stateProduct, setStateProduct] = useState({
     name: '',
@@ -98,9 +100,7 @@ const AdminProduct = () => {
     }
   }, [rowSelected]);
   // ✅ Tạo sản phẩm
-  const mutation = useMutationHooks((data) => ProductService.createProduct(data), {
-
-  });
+  const mutation = useMutationHooks((data) => ProductService.createProduct(data),);
   const { data, isLoading, isSuccess, isError } = mutation;
 
   // ✅ Cập nhật sản phẩm
@@ -173,17 +173,154 @@ const AdminProduct = () => {
   
   
   const onFinish = () => {
-    mutation.mutate(stateProduct);
+    mutation.mutate(stateProduct, {
+      onSettled: () => {
+        queryProduct.refetch();
+      },
+    });
   };
+  
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    // setSearchText(selectedKeys[0]);
+    // setSearchedColumn(dataIndex);
+  };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    // setSearchText('');
+  };
+
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <InputComponent
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    filterDropdownProps: {
+      onOpenChange(open) {
+        if (open) {
+          setTimeout(() => searchInput.current?.select(), 100);
+        }
+      },
+    },
+    // render: (text) =>
+    //   searchedColumn === dataIndex ? (
+    //     // <Highlighter
+    //     //   highlightStyle={{
+    //     //     backgroundColor: '#ffc069',
+    //     //     padding: 0,
+    //     //   }}
+    //     //   searchWords={[searchText]}
+    //     //   autoEscape
+    //     //   textToHighlight={text ? text.toString() : ''}
+    //     // />
+    //   ) : (
+    //     text
+    //   ),
+  });
+
+
+
+
   // ✅ Cột bảng
   const columns = [
     {
       title: 'Name',
       dataIndex: 'name',
       render: (text) => <a>{text}</a>,
+      sorter:(a,b) => a.name.length - b.name.length,
+      ...getColumnSearchProps('name')
     },
-    { title: 'Price', dataIndex: 'price' },
-    { title: 'Rating', dataIndex: 'rating' },
+    { title: 'Price', dataIndex: 'price' ,
+      sorter:(a,b) => a.name - b.name ,
+      filters: [
+        {
+          text: '>= 50',
+          value: '>=',
+        },
+        {
+          text: '<= 50',
+          value: '<=',
+        },
+      ],
+      onFilter: (value, record) =>{
+        if(value === '>='){
+          return record.price >= 50;
+        }
+        else if(value === '<='){
+          return record.price <= 50;
+        }
+      }
+    },
+    
+    { title: 'Rating', dataIndex: 'rating',
+      sorter:(a,b) => a.rating - b.rating ,
+      filters: [
+        {
+          text: '>= 3',
+          value: '>=',
+        },
+        {
+          text: '<= 2',
+          value: '<=',
+        },
+      ],
+      onFilter: (value, record) =>{
+        if(value === '>='){
+          return record.rating >= 4;
+        }
+        else if(value === '<='){
+          return record.rating <= 2;
+        }
+      }
+     },
     { title: 'Type', dataIndex: 'type' },
     {
       title: 'Action',
@@ -197,7 +334,8 @@ const AdminProduct = () => {
     },
   ];
 
-  const dataTable = Array.isArray(products) ? products.map((product) => ({ ...product, key: product._id })) : [];
+  const dataTable = products?.map(({ _id, ...rest }) => ({ ...rest, key: _id })) || [];
+
 
 
 
