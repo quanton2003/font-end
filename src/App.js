@@ -23,8 +23,6 @@ function App() {
 
   const query = useQuery({ queryKey: ['todos'], queryFn: fetchApi });
 
-  console.log('query', query);
-
   useEffect(() => {
     setIsLoading(true)
     const { storageData, decodedToken } = handleDecoded();

@@ -116,6 +116,19 @@ const AdminProduct = () => {
     const res =  ProductService.deleteProduct(id, token)
     return res;
   })
+
+
+  const mutationDeleteMany = useMutationHooks((data) => {
+    const {  token,...ids } = data;
+    const res =  ProductService.deleteManyProduct(ids, token)
+    return res;
+  })
+
+  console.log('mutationDeleteMany',mutationDeleteMany);
+  
+
+
+
   useEffect(() => {
     if (formDetails && stateProductDetails && Object.keys(stateProductDetails).length > 0) {
       formDetails.setFieldsValue(stateProductDetails);
@@ -123,6 +136,7 @@ const AdminProduct = () => {
   }, );
   const { data: dataUpdate, isSuccess: isSuccessUpdate, isError: isErrorUpdate } = mutationUpdate;
   const {data: dataDeleted, isLoading: isLoadingDeleted, isSuccess: isSuccessDeleted, isError:isErrorDeleted } = mutationDelete ;
+  const {data: dataDeletedMany, isLoading: isLoadingDeletedMany, isSuccess: isSuccessDeletedMany, isError:isErrorDeletedMany } = mutationDeleteMany ;
   // ✅ Xử lý khi chi tiết sản phẩm được chọn
   const handleDetailsProduct = () => {
     if (rowSelected) {
@@ -155,7 +169,6 @@ const AdminProduct = () => {
       console.error("🛑 Không có sản phẩm nào được chọn để xoá!");
       return;
     }
-  
     mutationDelete.mutate(
       {
         id: rowSelected,
@@ -334,9 +347,26 @@ const AdminProduct = () => {
     },
   ];
 
-  const dataTable = products?.map(({ _id, ...rest }) => ({ ...rest, key: _id })) || [];
-
-
+  const dataTable = products?.map(product => ({
+    ...product,
+    key: product._id // Đảm bảo _id được giữ lại
+  })) || [];
+  
+  
+const handleDeleteMany = (ids) =>{
+  mutationDeleteMany.mutate(
+    {
+      id: ids,
+      token: latestToken,
+    },
+    {
+      onSettled: () => {
+        queryProduct.refetch()
+      },
+    
+    }
+  );
+}
 
 
   useEffect(() => {
@@ -347,6 +377,14 @@ const AdminProduct = () => {
       massage.error('Thất bại');
     }
   }, [isSuccess, isError]);
+
+  useEffect(() => {
+    if (isSuccessDeletedMany && dataDeletedMany?.status === 'OK') {
+      massage.success('Thành công');
+    } else if (isErrorDeleted && dataDeleted?.status === 'ERR') {
+      massage.error('Thất bại');
+    }
+  }, [isSuccessDeletedMany, isErrorDeleted]);
 
   useEffect(() => {
     if (isSuccessUpdate && dataUpdate?.status === 'OK') {
@@ -421,7 +459,6 @@ const AdminProduct = () => {
       [e.target.name]: e.target.value,
     }));
   };
-  console.log(stateProduct);
   return (
     <div>
       <WrapperHeader>Quản lý sản phẩm</WrapperHeader>
@@ -440,7 +477,7 @@ const AdminProduct = () => {
         </Button>
       </div>
       <div style={{ marginTop: '20px' }}>
-        <TableComponent columns={columns} isLoading={isLoadingProduct} data={dataTable} onRow={(record, rowIndex) => ({
+        <TableComponent handleDeleteMany={handleDeleteMany}  forceRender columns={columns} isLoading={isLoadingProduct} data={dataTable} onRow={(record, rowIndex) => ({
           onClick: () => {
             if (record?._id) {
               setRowSelected(record._id);
@@ -453,6 +490,7 @@ const AdminProduct = () => {
         />
       </div>
       <ModalComponent
+      forceRender
         footer={null}
         title="Tạo sản phẩm"
         open={isModalOpen}
@@ -524,7 +562,7 @@ const AdminProduct = () => {
           </Form>
         </Loading>
       </ModalComponent>
-      <DrawerComponent title='Chi tiết sản phẩm' isOpen={isOpenDrawer} onClose={() => setIsOpenDrawer(false)} width="90%" >
+      <DrawerComponent forceRender title='Chi tiết sản phẩm' isOpen={isOpenDrawer} onClose={() => setIsOpenDrawer(false)} width="90%" >
         <Loading isLoading={isLoading}>
           <Form
             form={formDetails}
@@ -591,6 +629,7 @@ const AdminProduct = () => {
         </Loading>
       </DrawerComponent>
       <ModalComponent
+      forceRender
         title="Xoá sản phẩm"s
         open={isModalOpenDelete}
         onCancel={handleCancelDelete}

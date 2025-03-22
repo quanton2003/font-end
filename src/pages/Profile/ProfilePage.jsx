@@ -27,7 +27,7 @@ const ProfilePage = () => {
     setAddress(user?.address)
     setAvatar(user?.avatar)
   },[user])
-  const mutation = useMutationHooks((data) => UserService.updateUser(data));
+  const mutation = useMutationHooks((data) => UserService.updateUsersv(data));
   const dispatch = useDispatch()
   const { data, isSuccess ,isError} = mutation; 
     useEffect(() => {
