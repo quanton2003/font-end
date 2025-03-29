@@ -1,15 +1,64 @@
 // import axios from 'axios'
+import axios from 'axios';
 import { axiosJwt } from './UserService';
 
-export const getAllProduct = async () => {
-    try {
-        const res = await axiosJwt.get(`${process.env.REACT_APP_API_URL}/product/get-all`);
-        return res.data;
-    } catch (error) {
-        console.error("Lỗi khi lấy danh sách sản phẩm:", error);
-        return { data: [] }; // Trả về mảng rỗng để tránh lỗi
+// services/ProductService.js
+export const getAllProduct = async (search = '', limit) => {
+    let res = {};
+  
+    // Tùy chọn: chuyển đổi limit sang query string nếu có giá trị
+    const limitQuery = limit ? `&limit=${limit}` : '';
+  
+    if (search.length > 0) {
+      res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/product/get-all?filter=${search}${limitQuery}`
+      );
+    } else {
+      // Nếu không có search, chỉ thêm limitQuery nếu có
+      res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/product/get-all?${limitQuery}`
+      );
     }
+    return res.data;
+  };
+  export const getProductType = async (type) => {
+    if (type) {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/get-all`, {
+        params: { filter: ['type', type] }
+      });
+      return res.data;
+    }
+  };
+  
+  
+  
+  
+// Trong ProductService.js (hoặc file API của bạn)
+// export const getAllProductForAdmin = async (search = '') => {
+//   try {
+//     const res = await axios.get(
+//       `${process.env.REACT_APP_API_URL}/product/get-all?filter=${search}`
+//     );
+//     // Giả sử API trả về mảng sản phẩm trong res.data
+//     return res.data;
+//   } catch (error) {
+//     console.error('Lỗi khi fetch sản phẩm:', error);
+//     return [];
+//   }
+// };
+
+export const getAllProductForAdmin = async (search = '', page = 1, limit = 100) => {
+  try {
+    const res = await axios.get(
+      `${process.env.REACT_APP_API_URL}/product/get-all?page=${page}&limit=${limit}&filter=${search}`
+    );
+    return res.data; // { data, total, page, limit }
+  } catch (error) {
+    console.error('Lỗi khi fetch sản phẩm:', error);
+    return { data: [], total: 0 };
+  }
 };
+
 
 
 export const createProduct = async (data) => {
@@ -19,7 +68,7 @@ export const createProduct = async (data) => {
 
 };
 export const getDetailsProduct = async (id) => {
-    const res = await axiosJwt.get(`${process.env.REACT_APP_API_URL}/product/details-product/${id}`)
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/details-product/${id}`)
 
     return res.data;
 
@@ -63,3 +112,9 @@ export const deleteProduct = async (id,token) => {
   
     return res.data;
   };
+  export const getAllTypeProduct = async () => {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/product/get-all-type`)
+
+    return res.data;
+
+};

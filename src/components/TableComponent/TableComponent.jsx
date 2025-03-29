@@ -2,10 +2,12 @@ import { Table } from 'antd';
 import Loading from '../LoadingComponent/Loading';
 import { useState } from 'react';
 
+// import { Excel } from 'antd-table-saveas-excel';
+
 const TableComponent = (props) => {
   const {
     selectionType = 'checkbox',
-    data = [],
+    data:dataSource = [],
     isLoading = false,
     columns = [],
     handleDeleteMany,
@@ -32,48 +34,62 @@ const TableComponent = (props) => {
     }
   };
 
+  // const exportExcel =() => {
+  //   const excel = new Excel();
+  //   excel
+  //   .addSheet('test')
+  //   .addColums(columns)
+  //   .addDataSource(dataSource,{
+  //     str2Percent:true
+  //   })
+  //   .saveAs('Excel.xlsx')
+  // }
   return (
     <div>
       <Loading isLoading={isLoading}>
-        {rowSelectedKeys.length > 0 && (
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-            <div
-              style={{
-                background: '#1d1ddd',
-                color: '#fff',
-                fontWeight: 'bold',
-                padding: '10px',
-                cursor: 'pointer',
-              }}
-              onClick={handleDeleteAll}
-            >
-              Xoá tất cả
-            </div>
-            {handleDeleteManyUser && (
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+          {rowSelectedKeys.length > 0 && (
+            <>
               <div
                 style={{
-                  background: '#dd1d1d',
+                  background: '#1d1ddd',
                   color: '#fff',
                   fontWeight: 'bold',
                   padding: '10px',
                   cursor: 'pointer',
                 }}
-                onClick={handleDeleteUsers}
+                onClick={handleDeleteAll}
               >
-                Xoá user
+                Xoá tất cả
               </div>
-            )}
-          </div>
-        )}
+              <button >Export Excel</button>
+              {handleDeleteManyUser && (
+                <div
+                  style={{
+                    background: '#dd1d1d',
+                    color: '#fff',
+                    fontWeight: 'bold',
+                    padding: '10px',
+                    cursor: 'pointer',
+                  }}
+                  onClick={handleDeleteUsers}
+                >
+                  Xoá user
+                </div>
+              )}
+            </>
+          )}
+        </div>
         <Table
-          rowSelection={{
-            type: selectionType,
-            ...rowSelection,
-          }}
-          columns={columns}
-          dataSource={data}
-          {...props}
-        />
+  rowSelection={{
+    type: selectionType,
+    ...rowSelection,
+  }}
+  columns={columns}
+  dataSource={dataSource}
+  pagination={props.pagination} // đảm bảo prop này được truyền xuống
+  {...props}
+/>
       </Loading>
     </div>
   );

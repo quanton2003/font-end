@@ -8,40 +8,43 @@ const ButtonInputSearch = (props) => {
         size,
         placeholder,
         textButton,
-        variant = 'outlined', // Thay bordered bằng variant
+        variant = 'outlined',
         backgroundColorInput = '#fff',
         backgroundColorButton = 'rgb(13,92,182)',
-        colorButton = '#fff'
+        colorButton = '#fff',
+        onSearch,  // Nhận prop onSearch từ HeaderComponent
     } = props;
 
     return (
         <div style={{ display: 'flex', width: '100%' }}>
-            {/* Input - Vuông hơn */}
+            {/* Input - Truyền onSearch xuống InputComponent */}
             <InputComponent
                 size={size}
                 placeholder={placeholder}
-                variant={variant} // Sử dụng variant thay vì bordered
+                variant={variant}
+                onChange={onSearch}  // Thêm sự kiện onChange để bắt giá trị nhập vào
                 style={{
                     backgroundColor: backgroundColorInput,
-                    borderRadius: 0, // Bỏ bo góc
+                    borderRadius: 0,
                 }}
             />
 
-            {/* Button - Vuông hơn */}
+            {/* Button */}
             <ButtonComponent
                 size={size}
                 style={{
                     background: backgroundColorButton,
                     color: colorButton,
-                    borderRadius: 0, // Bỏ bo góc
+                    borderRadius: 0,
                     border: variant === 'borderless' ? 'none' : undefined
                 }}
                 icon={<SearchOutlined style={{ color: colorButton }} />}
             >
-              <span>{textButton}</span>
+                <span>{textButton}</span>
             </ButtonComponent>
         </div>
-    )
-}
+    );
+};
+
 
 export default ButtonInputSearch;

@@ -6,8 +6,9 @@ import ButtonInputSearch from '../ButtonInputSearch/ButtonInputSearch';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as UserService from '../../services/UserService';
-import { resetUser } from '../../redux/sides/userSlide';
+import { resetUser, updateUser } from '../../redux/sides/userSlide';
 import Loading from '../LoadingComponent/Loading';
+import { searchProduct } from '../../redux/sides/ProductSlide';
 
 const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
   const dispatch = useDispatch();
   const [userName, setUserName] = useState('');
   const [userAvatar, setUserAvatar] = useState('');
+  const [search,setSearch ]= useState('');
   const [loading, setLoading] = useState(false);
 
   const handleNavigateLogin = () => {
@@ -56,6 +58,12 @@ const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
     </div>
   );
 
+  const onSearch = (e) => {
+    setSearch(e.target.value);
+    dispatch(searchProduct(e.target.value));
+};
+
+  
   return (
     <div style={{ width: '100%', background: 'rgb(26,148,255)', display: 'flex', justifyContent: 'center' }}>
       <WrapperHeader style={{ justifyContent: isHidenSearch && isHidenCart ? 'space-between' : 'unset' }} gutter={16}>
@@ -64,10 +72,19 @@ const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
         </Col>
 
         {!isHidenSearch && (
-          <Col span={13}>
-            <ButtonInputSearch size="large" textButton="Tìm kiếm" bordered={false} placeholder="Tìm Kiếm" enterButton />
-          </Col>
-        )}
+  <Col span={13}>
+<ButtonInputSearch 
+  onSearch={onSearch}  // Thêm prop này để truyền hàm onSearch xuống ButtonInputSearch
+  size="large" 
+  textButton="Tìm kiếm" 
+  bordered={false} 
+  placeholder="Tìm Kiếm" 
+  enterButton 
+/>
+
+  </Col>
+)}
+
 
         <Col span={6} style={{ display: 'flex', gap: '54px', alignItems: 'center' }}>
           <Loading isLoading={loading}>
@@ -95,7 +112,7 @@ const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
           </Loading>
 
           {!isHidenCart && (
-            <div>
+            <div onClick={()=> navigate('/orders')} style={{ cursor:'pointer'}} >
               <Badge count={4} size="small">
                 <ShoppingCartOutlined style={{ fontSize: '30px', color: '#fff' }} />
               </Badge>
