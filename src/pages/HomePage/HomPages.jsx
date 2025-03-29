@@ -15,7 +15,7 @@ const HomPages = () => {
   const [typeProducts, setTypeProducts] = useState([])
   const searchProduct = useSelector((state) => state?.product?.search);
   // Sử dụng debounce (1000ms) cho giá trị tìm kiếm để tránh gọi API liên tục
-  const searchDebounce = useDebounce(searchProduct, 1000);
+  const searchDebounce = useDebounce(searchProduct, 500);
   const [stateProducts, setStateProducts] = useState([]);
   const [limit, setLimit] = useState(6);
 
