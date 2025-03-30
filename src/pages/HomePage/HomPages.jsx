@@ -17,6 +17,7 @@ const HomPages = () => {
   // Sử dụng debounce (1000ms) cho giá trị tìm kiếm để tránh gọi API liên tục
   const searchDebounce = useDebounce(searchProduct, 500);
   const [stateProducts, setStateProducts] = useState([]);
+
   const [limit, setLimit] = useState(6);
 
   // Hàm fetch sử dụng context từ react-query

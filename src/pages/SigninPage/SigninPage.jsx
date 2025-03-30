@@ -5,7 +5,7 @@ import ButtonComponent from '../../components/ButttonComponent/ButttonComponent'
 import { Image, message } from 'antd';
 import ImageLogo from '../../assets/Images/logologin.png';
 import { EyeFilled, EyeInvisibleFilled } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import * as UserService from '../../services/UserService';
 import { useMutationHooks } from '../../hooks/useMutationHooks';
 import Loading from '../../components/LoadingComponent/Loading';
@@ -16,6 +16,7 @@ import { updateUser } from '../../redux/sides/userSlide';
 const SigninPage = () => {
   const [isShowPassword, setIsShowPassword] = useState(false);
   const [email, setEmail] = useState('');
+  const location  = useLocation()
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -25,8 +26,12 @@ const SigninPage = () => {
 
   useEffect(() => {
     if (isSuccess && data?.status === "OK") {
+      if(location?.state){
+        navigate(location?.state)
+      }else{
+        navigate('/');
+      }
       message.success("Đăng nhập thành công!");
-      navigate('/');
       localStorage.setItem('access_token',JSON.stringify(data?.access_token)); // Đảm bảo dùng đúng key
       console.log("Token từ localStorage:", localStorage.getItem("token")); // Kiểm tra lại
       
