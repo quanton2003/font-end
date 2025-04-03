@@ -38,6 +38,7 @@ const AdminProduct = () => {
     type: '',
     countInStock: '',
     newType: '',
+    discount: '',
   });
 
   const [stateProductDetails, setStateProductDetails] = useState({
@@ -48,6 +49,7 @@ const AdminProduct = () => {
     image: null,
     type: '',
     countInStock: '',
+    discount: '',
   });
 
   const fetchAllTypeProduct = async () => {
@@ -193,6 +195,7 @@ const AdminProduct = () => {
       image: stateProduct.image,
       type: stateProduct.type ==='add_type'?stateProduct.newType :stateProduct.type,
       countInStock: stateProduct.countInStock,
+      discount: stateProduct.discount,
     }
     mutationCreate.mutate(params, {
       onSettled: () => {
@@ -301,6 +304,7 @@ const AdminProduct = () => {
         image: null,
         type: '',
         countInStock: '',
+        discount: '',
       });
       formCreate.resetFields();
     }
@@ -481,6 +485,9 @@ const AdminProduct = () => {
             <Form.Item label="Rating" name="rating" rules={[{ required: true, message: 'Vui lòng nhập đánh giá!' }]}>
               <InputComponent value={stateProduct.rating} name="rating" onChange={handleOnchange} />
             </Form.Item>
+            <Form.Item label="Discount" name="discount" rules={[{ required: true, message: 'Vui lòng nhập Giảm giá!' }]}>
+              <InputComponent value={stateProduct.discount} name="discount" onChange={handleOnchange} />
+            </Form.Item>
             <Form.Item label="Description" name="description" rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}>
               <InputComponent value={stateProduct.description} name="description" onChange={handleOnchange} />
             </Form.Item>
@@ -540,6 +547,9 @@ const AdminProduct = () => {
             </Form.Item>
             <Form.Item label="Description" name="description" rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}>
               <InputComponent value={stateProductDetails.description} name="description" onChange={handleOnchangeDetails} />
+            </Form.Item>
+            <Form.Item label="discount" name="discount" rules={[{ required: true, message: 'Vui lòng nhập discount!' }]}>
+              <InputComponent value={stateProductDetails.discount} name="discount" onChange={handleOnchangeDetails} />
             </Form.Item>
             <Form.Item label="Upload Image" name="image">
               <Upload

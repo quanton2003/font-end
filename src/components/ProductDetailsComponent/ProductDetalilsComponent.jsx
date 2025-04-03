@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Col, Image, Row, InputNumber } from 'antd';
 import { StarFilled, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import * as ProductService from '../../services/ProductService';
@@ -17,14 +17,16 @@ import { useQuery } from '@tanstack/react-query';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { addOrderProduct } from '../../redux/sides/OrderSlide';
+import { convertPrice } from '../../services/utils';
 
 const ProductDetalilsComponent = ({ idProduct }) => {
   const [quantity, setQuantity] = useState(1);
   const userAddress = useSelector((state) => state?.user?.address); // Lấy địa chỉ từ Redux
   const user = useSelector((state) => state?.user); // Lấy thông tin người dùng từ Redux
-  const navigate = useNavigate()
-  const location = useLocation()
-  const dispatch = useDispatch()
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+
   const fetchGetDetailsProduct = async (id) => {
     if (!id) return null;
     const res = await ProductService.getDetailsProduct(id);
@@ -56,46 +58,24 @@ const ProductDetalilsComponent = ({ idProduct }) => {
   };
 
   const handleAddOrderProduct = () => {
-    if(!user?.id){
-      navigate('/sign-in',{state: location?.pathname})
-    }else{
-    //   orderItems: [{
-    //     name: {
-    //         type: String,
-    //         required: true
-    //     },
-    //     amount: {
-    //         type: Number,
-    //         required: true
-    //     },
-    //     image: {
-    //         type: String,
-    //         required: true
-    //     },
-    //     price: {
-    //         type: Number,
-    //         required: true
-    //     },
-    //     product: {
-    //         type: mongoose.Schema.Types.ObjectId,
-    //         ref: "Product",
-    //         required: true,
-    //     },
-    // }, ],
-      dispatch(addOrderProduct({
-        orderItems: {
-          name: productDetails?.name,
-          amount: quantity,
-          image: productDetails?.image,
-          price: productDetails?.price,
-          product: productDetails?._id,
-        }
-      }))
+    if (!user?.id) {
+      navigate('/sign-in', { state: location?.pathname });
+    } else {
+      dispatch(
+        addOrderProduct({
+          orderItems: {
+            name: productDetails?.name,
+            amount: quantity,
+            image: productDetails?.image,
+            price: productDetails?.price,
+            discount: productDetails?.discount, // lưu discount vào order
+            product: productDetails?._id,
+          },
+        })
+      );
     }
-  }
+  };
 
-
-  
   return (
     <Row style={{ padding: '16px', background: '#fff', borderRadius: '8px' }}>
       <Col
@@ -127,9 +107,20 @@ const ProductDetalilsComponent = ({ idProduct }) => {
           <WrapperStyleTextSell>| Đã Bán {selled || 0}</WrapperStyleTextSell>
         </div>
         <WrapperPriceProduct>
-          <WrapperPriceTextProduct>
-            {price ? `${price.toLocaleString()} đ` : 'Liên hệ'}
-          </WrapperPriceTextProduct>
+          {productDetails.discount > 0 ? (
+            <>
+              {/* Giá sau giảm được hiển thị nổi bật */}
+              <WrapperPriceTextProduct>
+                {convertPrice(productDetails.price * (1 - productDetails.discount / 100))}
+              </WrapperPriceTextProduct>
+              {/* Giá gốc, gạch ngang */}
+              <div style={{ textDecoration: 'line-through', color: '#999', marginLeft: 8 }}>
+                {convertPrice(productDetails.price)}
+              </div>
+            </>
+          ) : (
+            <WrapperPriceTextProduct>{convertPrice(productDetails.price)}</WrapperPriceTextProduct>
+          )}
         </WrapperPriceProduct>
         <WrapperAddressProduct>
           <span>Giao đến: </span>

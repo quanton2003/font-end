@@ -11,6 +11,7 @@ const initialState = {
   avatar: storedUser.avatar || "",
   access_token: storedUser.access_token || null,
   isAdmin: storedUser.isAdmin || false, // 🔹 Tránh undefined
+  city: '',
 };
 
 export const userSlide = createSlice({
@@ -18,7 +19,7 @@ export const userSlide = createSlice({
   initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { _id, name, email, access_token, phone, address, avatar, isAdmin } = action.payload;
+      const { _id, name, email, access_token, phone, address, avatar, isAdmin,city } = action.payload;
       state.id = _id || state.id; // 🔹 Giữ giá trị cũ nếu không có _id
       state.name = name || state.name;
       state.email = email || state.email;
@@ -26,7 +27,8 @@ export const userSlide = createSlice({
       state.address = address || state.address;
       state.avatar = avatar || state.avatar;
       state.access_token = access_token || state.access_token;
-      state.isAdmin = isAdmin ?? state.isAdmin; // 🔹 Giữ giá trị hiện tại nếu isAdmin là undefined
+      state.isAdmin = isAdmin ?? state.isAdmin;
+      state.city = city// 🔹 Giữ giá trị hiện tại nếu isAdmin là undefined
 
       // ✅ Chỉ lưu các dữ liệu quan trọng vào localStorage
       localStorage.setItem(

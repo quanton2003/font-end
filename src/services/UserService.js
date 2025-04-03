@@ -133,7 +133,6 @@ export const logOutUser = async () => {
       return res.data;
 
 };
-
 export const updateUsersv = async (data) => {
   const res = await axiosJwt.put(
     `${process.env.REACT_APP_API_URL}/user/update-user/${data.id}`,
@@ -145,6 +144,7 @@ export const updateUsersv = async (data) => {
 
   return res.data;
 };
+
 
 export const deleteManyUser= async (data,token) => {
   const res = await axiosJwt.post(

@@ -9,6 +9,7 @@ import {
   WrapperReporText,
   WrapperStyleTextSell,
 } from './style';
+import { convertPrice } from '../../services/utils';
 
 const CardComponent = (props) => {
   const {
@@ -52,7 +53,7 @@ const CardComponent = (props) => {
       </WrapperReporText>
       <WrapperPriceText>
         <span style={{ marginRight: '8px' }}>
-          {(price || 0).toLocaleString()}
+          {convertPrice(price)} 
         </span>
         <WrapperDiscountText>-{discount || 5}%</WrapperDiscountText>
       </WrapperPriceText>
