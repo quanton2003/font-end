@@ -1,21 +1,19 @@
 import { Card, Radio, Button, message, Table } from 'antd';
 import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { convertPrice } from '../../services/utils';
 import { useNavigate } from 'react-router-dom';
 import { useMutationHooks } from '../../hooks/useMutationHooks';
 import * as OrderService from '../../services/OrderService';
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import axios from 'axios';  // Để gửi yêu cầu tới backend
 
 const PaymentPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const order = useSelector((state) => state.order);
   const user = useSelector((state) => state.user);
   const [paymentMethod, setPaymentMethod] = useState('cod');
 
-   console.log(user);
-   
-  // Tính toán các giá trị đơn hàng
   const shippingFee = 15000;
   const totalProductsAmount = order.orderItems.reduce((acc, item) => {
     const discount = item.discount || 0;
@@ -24,18 +22,15 @@ const PaymentPage = () => {
   }, 0);
   const totalAmount = totalProductsAmount + shippingFee;
 
-  // Chuyển đổi order.orderItems thành dataSource có thuộc tính key duy nhất
   const dataSource = order.orderItems.map((item, index) => ({
     key: item.id || index.toString(),
     ...item,
   }));
 
-  // Định nghĩa mutation thêm đơn hàng
   const mutationAddOrder = useMutationHooks((data) => {
     return OrderService.createOrder(data.token, data);
   });
 
-  // Hàm xử lý thanh toán
   const handlePayment = () => {
     const payload = {
       token: user?.access_token,
@@ -43,7 +38,7 @@ const PaymentPage = () => {
       itemPrice: totalProductsAmount,
       shippingPrice: shippingFee,
       totalPrice: totalAmount,
-      user: user?.id, // Đảm bảo gửi ID người dùng
+      user: user?.id,
       shippingAddress: {
         fullName: user?.name,
         address: user?.address,
@@ -53,9 +48,6 @@ const PaymentPage = () => {
       orderItems: order.orderItems,
     };
 
-    console.log("🚀 Payload gửi lên Backend:", payload.user, payload.shippingAddress.fullName, payload.shippingAddress.address,payload.shippingAddress.city,payload.shippingAddress.phone);
-
-    // Kiểm tra các trường bắt buộc
     if (
       !payload.user ||
       !payload.shippingAddress.fullName ||
@@ -68,17 +60,66 @@ const PaymentPage = () => {
     }
 
     mutationAddOrder.mutate(payload, {
-      onSuccess: (data) => {
-        message.success("Thanh toán thành công!");
-        navigate("/");
+      onSuccess: () => {
+        message.success("Đặt hàng thành công!");
+        navigate("/");  // Chuyển hướng người dùng về trang chủ hoặc trang khác
       },
-      onError: (error) => {
+      onError: () => {
         message.error("Thanh toán thất bại, vui lòng thử lại!");
       },
     });
   };
 
-  // Các cột của bảng hiển thị sản phẩm
+  // Hàm xử lý thanh toán qua VNPAY
+  const handleVnPayPayment = async () => {
+    try {
+      const payload = {
+        token: user?.access_token,
+        paymentMethod: 'vnpay',
+        itemPrice: totalProductsAmount,
+        shippingPrice: shippingFee,
+        totalPrice: totalAmount,
+        user: user?.id,
+        shippingAddress: {
+          fullName: user?.name,
+          address: user?.address,
+          city: user?.city,
+          phone: user?.phone,
+        },
+        orderItems: order.orderItems,
+      };
+
+      // Gửi yêu cầu đến backend để lấy URL thanh toán VNPAY
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/paymen/create-payment-url`, {
+        token: user?.access_token,
+        paymentMethod: 'vnpay',
+        itemPrice: totalProductsAmount,
+        shippingPrice: shippingFee,
+        totalPrice: totalAmount,
+        user: user?.id,
+        shippingAddress: {
+          fullName: user?.name,
+          address: user?.address,
+          city: user?.city,
+          phone: user?.phone,
+        },
+        orderItems: order.orderItems,
+      });
+      
+      // const res = await axiosJwt.get(`${process.env.REACT_APP_API_URL}/user/get-details/${id}`);
+
+      if (response.data && response.data.url) {
+        // Chuyển hướng người dùng đến URL VNPAY
+        window.location.href = response.data.url;
+      } else {
+        message.error("Có lỗi xảy ra khi tạo URL thanh toán VNPAY.");
+      }
+    } catch (err) {
+      console.error(err);
+      message.error("Có lỗi xảy ra khi thanh toán qua VNPAY.");
+    }
+  };
+
   const columns = [
     {
       title: 'Sản phẩm',
@@ -120,8 +161,7 @@ const PaymentPage = () => {
       render: (_, record) => {
         const discount = record.discount || 0;
         const effectivePrice = record.price * (1 - discount / 100);
-        const computedTotal = effectivePrice * record.amount;
-        return <span style={{ color: 'red' }}>{convertPrice(computedTotal)}</span>;
+        return <span style={{ color: 'red' }}>{convertPrice(effectivePrice * record.amount)}</span>;
       },
     },
   ];
@@ -133,8 +173,8 @@ const PaymentPage = () => {
       <Card title="Phương thức thanh toán" style={{ marginTop: 20 }}>
         <Radio.Group onChange={(e) => setPaymentMethod(e.target.value)} value={paymentMethod}>
           <Radio value="cod">Thanh toán khi nhận hàng (COD)</Radio>
-          <Radio value="bank">Chuyển khoản ngân hàng</Radio>
-          <Radio value="momo">Ví MoMo</Radio>
+          <Radio value="paypal">Thanh toán qua PayPal</Radio>
+          <Radio value="vnpay">Thanh toán qua VNPAY</Radio> {/* Thêm tùy chọn VNPAY */}
         </Radio.Group>
       </Card>
 
@@ -147,9 +187,41 @@ const PaymentPage = () => {
         <p style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>
           Tổng tiền: {convertPrice(totalAmount)}
         </p>
-        <Button type="primary" onClick={handlePayment} style={{ width: '100%', marginTop: 10 }}>
-          Xác nhận thanh toán
-        </Button>
+
+        {paymentMethod === 'paypal' ? (
+          <PayPalScriptProvider options={{
+            "client-id": "AYAbxk1SwUBExXwTV1c7cZImEZz21I6j6FFpIXkV9GhWPUX17_11pPFgOCZmDnAJqvGx8QKWk-QkC3Ut",
+            "components": "buttons",
+            "disable-funding": "card"
+          }}>
+            <PayPalButtons
+              style={{ layout: "vertical" }}
+              createOrder={(data, actions) => {
+                return actions.order.create({
+                  purchase_units: [{ amount: { value: (totalAmount / 1000).toFixed(2) } }], // Chuyển sang VND nếu cần
+                });
+              }}
+              onApprove={(data, actions) => {
+                return actions.order.capture().then((details) => {
+                  message.success(`Thanh toán thành công bởi ${details.payer.name.given_name}`);
+                  handlePayment();
+                });
+              }}
+              onError={(err) => {
+                console.error("PayPal Error:", err);
+                message.error("Có lỗi xảy ra khi thanh toán với PayPal.");
+              }}
+            />
+          </PayPalScriptProvider>
+        ) : paymentMethod === 'vnpay' ? (
+          <Button type="primary" onClick={handleVnPayPayment} style={{ width: '100%', marginTop: 10 }}>
+            Thanh toán qua VNPAY
+          </Button>
+        ) : (
+          <Button type="primary" onClick={handlePayment} style={{ width: '100%', marginTop: 10 }}>
+            Xác nhận thanh toán
+          </Button>
+        )}
       </Card>
     </div>
   );

@@ -54,6 +54,7 @@ const HeaderComponent = ({ isHidenSearch = false, isHidenCart = false }) => {
     <div>
       <WrapperContentPopup onClick={handleLogOut}>Đăng Xuất</WrapperContentPopup>
       <WrapperContentPopup onClick={() => navigate('/profile-user')}>Thông tin tài khoản</WrapperContentPopup>
+      <WrapperContentPopup onClick={() => navigate('/my-order')}>Đơn đã mua</WrapperContentPopup>
       {user?.isAdmin && <WrapperContentPopup onClick={() => navigate('/system-admin')}>Quản lý hệ thống</WrapperContentPopup>}
     </div>
   );

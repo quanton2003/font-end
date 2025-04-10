@@ -7,7 +7,10 @@ import { axiosJwt } from './UserService';
 //     return res.data;
 
 // };
-
+export const getMyOrders = async (userId) => {
+    const res = await axios.get(`${process.env.REACT_APP_API_URL}/order/my-order/${userId}`);
+    return res.data;
+  };
 export const createOrder = async (access_token, data) => {
     console.log("Dữ liệu gửi lên:", data); // Debug dữ liệu
     try {
@@ -36,3 +39,11 @@ export const getOrderById = async (orderId) => {
       throw error;
     }
   };
+  export const deleteOrder = async (orderId) => {
+    try {
+      const response = await axios.delete(`${process.env.REACT_APP_API_URL}/order/delete/${orderId}`);
+      return response.data;
+    } catch (error) {
+      alert('Không thể xoá đơn hàng!');
+    }
+}
