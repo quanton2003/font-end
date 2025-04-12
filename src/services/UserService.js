@@ -111,19 +111,28 @@ export const deleteUser = async (id, access_token) => {
 
 
 
-export const refreshToken = async () => {
-  try {
-      const res = await axios.post(`${process.env.REACT_APP_API_URL}/user/refresh-token`, {}, {
-          withCredentials: true  // ✅ Quan trọng để gửi cookies refresh token
-      });
-      console.log("✅ Token refreshed:", res.data.access_token); // Debug xem có lấy được token không
-      return res.data;
-  } catch (error) {
-      console.error('❌ Lỗi refresh token:', error);
-      throw error;
-  }
-};
+// export const refreshToken = async () => {
+//   try {
+//       const res = await axios.post(`${process.env.REACT_APP_API_URL}/user/refresh-token`, {}, {
+//           withCredentials: true  // ✅ Quan trọng để gửi cookies refresh token
+//       });
+//       console.log("✅ Token refreshed:", res.data.access_token); // Debug xem có lấy được token không
+//       return res.data;
+//   } catch (error) {
+//       console.error('❌ Lỗi refresh token:', error);
+//       throw error;
+//   }
+// };
 
+export const refreshToken = async (refreshToken) => {
+  console.log("🔄 Gọi API refresh token...",refreshToken);
+  const res = await axios.post(process.env.REACT_APP_API_URL + "/user/refresh-token", {},{
+    headers: {
+      token: `Bearer ${refreshToken}`,
+    },
+  })
+  return res.data;
+}
 
 
 
