@@ -19,7 +19,7 @@ export const userSlide = createSlice({
   initialState,
   reducers: {
     updateUser: (state, action) => {
-      const { _id, name, email, access_token, phone, address, avatar, isAdmin,city } = action.payload;
+      const { _id, name, email, access_token, phone, address, avatar, isAdmin,city,refreshToken } = action.payload;
       state.id = _id || state.id; // 🔹 Giữ giá trị cũ nếu không có _id
       state.name = name || state.name;
       state.email = email || state.email;
@@ -29,7 +29,7 @@ export const userSlide = createSlice({
       state.access_token = access_token || state.access_token;
       state.isAdmin = isAdmin ?? state.isAdmin;
       state.city = city// 🔹 Giữ giá trị hiện tại nếu isAdmin là undefined
-
+      state.refreshToken = refreshToken
       // ✅ Chỉ lưu các dữ liệu quan trọng vào localStorage
       localStorage.setItem(
         "user",
